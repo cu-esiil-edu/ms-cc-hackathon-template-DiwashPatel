@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌱 ICC - The Invisible Carbon Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --primary-dark: #1b5e20;
+            --secondary: #ff9800;
+            --accent: #2196f3;
+            --background: #f5f9f5;
+            --card: #ffffff;
+            --text: #333333;
+            --text-light: #757575;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --error: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1rem;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+        
+        .tab {
+            padding: 1rem 2rem;
+            background-color: var(--primary-light);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tab:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .tab.active {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .calculator-container {
+            display: none;
+            background-color: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .calculator-container.active {
+            display: block;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+            font-size: 1.4rem;
+        }
+        
+        .section-icon {
+            font-size: 1.8rem;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .value-display {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .slider-container {
+            padding: 0.5rem 0;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, var(--primary-light), var(--primary-dark));
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-dark);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .select-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .select-option {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background-color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .select-option:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+        
+        .select-option.selected {
+            border-color: var(--primary);
+            background-color: rgba(46, 125, 50, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+        }
+        
+        .select-option i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: var(--primary);
+        }
+        
+        .btn-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .btn-calculate {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-calculate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn-calculate:active {
+            transform: translateY(1px);
+        }
+        
+        .results-container {
+            background-color: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin: 2rem 0;
+            display: none;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .results-title {
+            font-size: 2rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .total-footprint {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+        
+        .comparison {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+        
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .chart-wrapper {
+            flex: 1;
+            min-width: 300px;
+            padding: 1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .chart-title {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        .recommendations {
+            margin-top: 3rem;
+        }
+        
+        .recommendations-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+        }
+        
+        .recommendation-card {
+            background: linear-gradient(to right, rgba(46, 125, 50, 0.05), rgba(33, 150, 243, 0.05));
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .rec-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .rec-impact {
+            display: inline-block;
+            background-color: rgba(46, 125, 50, 0.2);
+            color: var(--primary-dark);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .info-box {
+            background-color: rgba(33, 150, 243, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .info-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            margin-top: 3rem;
+        }
+        
+        .digital-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .chart-container {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .tab {
+                width: 100%;
+            }
+            
+            .digital-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <div class="logo">🌱</div>
+            <div>
+                <h1>The Invisible Carbon Calculator</h1>
+                <p class="subtitle">Uncover the carbon footprint you can't see—at home, on the road, and online.</p>
+            </div>
+            <div class="logo">🌍</div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="simple">Simple Calculator</button>
+            <button class="tab" data-tab="advanced">Advanced Calculator</button>
+        </div>
+        
+        <!-- Simple Calculator -->
+        <div id="simple-calculator" class="calculator-container active">
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-car section-icon"></i> Transportation</h2>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Weekly km driven</span>
+                        <span class="value-display" id="car-km-value">50 km</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="500" value="50" class="slider" id="car-km">
+                    </div>
+                </div>
+                
+                <div class="select-group">
+                    <div class="select-option" data-value="gasoline">
+                        <i class="fas fa-gas-pump"></i>
+                        <div>Gasoline Car</div>
+                    </div>
+                    <div class="select-option" data-value="diesel">
+                        <i class="fas fa-oil-can"></i>
+                        <div>Diesel Car</div>
+                    </div>
+                    <div class="select-option" data-value="electric">
+                        <i class="fas fa-charging-station"></i>
+                        <div>Electric Car</div>
+                    </div>
+                    <div class="select-option" data-value="none">
+                        <i class="fas fa-walking"></i>
+                        <div>No Car</div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Annual short flights (&lt;500km)</span>
+                        <span class="value-display" id="short-flights-value">0 km</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="2000" value="0" class="slider" id="short-flights">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Annual long flights (&gt;500km)</span>
+                        <span class="value-display" id="long-flights-value">0 km</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="20000" value="0" class="slider" id="long-flights">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-utensils section-icon"></i> Diet</h2>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Meals per day</span>
+                        <span class="value-display" id="meals-value">3 meals</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="6" value="3" class="slider" id="meals">
+                    </div>
+                </div>
+                
+                <div class="select-group">
+                    <div class="select-option" data-value="meat_heavy">
+                        <i class="fas fa-drumstick-bite"></i>
+                        <div>Meat Heavy</div>
+                    </div>
+                    <div class="select-option selected" data-value="meat_medium">
+                        <i class="fas fa-hamburger"></i>
+                        <div>Meat Medium</div>
+                    </div>
+                    <div class="select-option" data-value="pescatarian">
+                        <i class="fas fa-fish"></i>
+                        <div>Pescatarian</div>
+                    </div>
+                    <div class="select-option" data-value="vegetarian">
+                        <i class="fas fa-seedling"></i>
+                        <div>Vegetarian</div>
+                    </div>
+                    <div class="select-option" data-value="vegan">
+                        <i class="fas fa-leaf"></i>
+                        <div>Vegan</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-home section-icon"></i> Household</h2>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Monthly electricity (kWh)</span>
+                        <span class="value-display" id="electricity-value">150 kWh</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="1000" value="150" class="slider" id="electricity">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Monthly gas (m³)</span>
+                        <span class="value-display" id="gas-value">80 m³</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="500" value="80" class="slider" id="gas">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Monthly water usage (m³)</span>
+                        <span class="value-display" id="water-value">10 m³</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="50" value="10" class="slider" id="water">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn-calculate" id="calculate-simple">Calculate My Footprint</button>
+            </div>
+        </div>
+        
+        <!-- Advanced Calculator -->
+        <div id="advanced-calculator" class="calculator-container">
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-car section-icon"></i> Transportation</h2>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Weekly km driven</span>
+                        <span class="value-display" id="adv-car-km-value">50 km</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="500" value="50" class="slider" id="adv-car-km">
+                    </div>
+                </div>
+                
+                <div class="select-group">
+                    <div class="select-option" data-value="gasoline">
+                        <i class="fas fa-gas-pump"></i>
+                        <div>Gasoline Car</div>
+                    </div>
+                    <div class="select-option" data-value="diesel">
+                        <i class="fas fa-oil-can"></i>
+                        <div>Diesel Car</div>
+                    </div>
+                    <div class="select-option" data-value="electric">
+                        <i class="fas fa-charging-station"></i>
+                        <div>Electric Car</div>
+                    </div>
+                    <div class="select-option" data-value="none">
+                        <i class="fas fa-walking"></i>
+                        <div>No Car</div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Annual short flights (&lt;500km)</span>
+                        <span class="value-display" id="adv-short-flights-value">0 km</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="2000" value="0" class="slider" id="adv-short-flights">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Annual long flights (&gt;500km)</span>
+                        <span class="value-display" id="adv-long-flights-value">0 km</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="20000" value="0" class="slider" id="adv-long-flights">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-utensils section-icon"></i> Diet</h2>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Meals per day</span>
+                        <span class="value-display" id="adv-meals-value">3 meals</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="6" value="3" class="slider" id="adv-meals">
+                    </div>
+                </div>
+                
+                <div class="select-group">
+                    <div class="select-option" data-value="meat_heavy">
+                        <i class="fas fa-drumstick-bite"></i>
+                        <div>Meat Heavy</div>
+                    </div>
+                    <div class="select-option selected" data-value="meat_medium">
+                        <i class="fas fa-hamburger"></i>
+                        <div>Meat Medium</div>
+                    </div>
+                    <div class="select-option" data-value="pescatarian">
+                        <i class="fas fa-fish"></i>
+                        <div>Pescatarian</div>
+                    </div>
+                    <div class="select-option" data-value="vegetarian">
+                        <i class="fas fa-seedling"></i>
+                        <div>Vegetarian</div>
+                    </div>
+                    <div class="select-option" data-value="vegan">
+                        <i class="fas fa-leaf"></i>
+                        <div>Vegan</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-home section-icon"></i> Household</h2>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Monthly electricity (kWh)</span>
+                        <span class="value-display" id="adv-electricity-value">150 kWh</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="1000" value="150" class="slider" id="adv-electricity">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Monthly gas (m³)</span>
+                        <span class="value-display" id="adv-gas-value">80 m³</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="500" value="80" class="slider" id="adv-gas">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-label">
+                        <span>Monthly water usage (m³)</span>
+                        <span class="value-display" id="adv-water-value">10 m³</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="50" value="10" class="slider" id="adv-water">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-laptop section-icon"></i> Digital Life</h2>
+                
+                <div class="digital-grid">
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>Smartphones owned</span>
+                            <span class="value-display" id="smartphones-value">1</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="5" value="1" class="slider" id="smartphones">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>Laptops owned</span>
+                            <span class="value-display" id="laptops-value">1</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="5" value="1" class="slider" id="laptops">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>Desktops owned</span>
+                            <span class="value-display" id="desktops-value">0</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="5" value="0" class="slider" id="desktops">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>Weekly streaming hours</span>
+                            <span class="value-display" id="streaming-value">10 hours</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="50" value="10" class="slider" id="streaming">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>Streaming quality</span>
+                        </div>
+                        <div class="select-group">
+                            <div class="select-option selected" data-value="hd">
+                                <i class="fas fa-tv"></i>
+                                <div>HD Quality</div>
+                            </div>
+                            <div class="select-option" data-value="4k">
+                                <i class="fas fa-tv"></i>
+                                <div>4K Quality</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>Daily social media hours</span>
+                            <span class="value-display" id="social-media-value">2 hours</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="10" value="2" class="slider" id="social-media">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>Cloud storage used (GB)</span>
+                            <span class="value-display" id="cloud-value">50 GB</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="1000" value="50" class="slider" id="cloud">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>Daily emails received</span>
+                            <span class="value-display" id="emails-value">50 emails</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="500" value="50" class="slider" id="emails">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span>Weekly gaming hours</span>
+                            <span class="value-display" id="gaming-value">5 hours</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="40" value="5" class="slider" id="gaming">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn-calculate" id="calculate-advanced">Calculate My Footprint</button>
+            </div>
+        </div>
+        
+        <!-- Results Container -->
+        <div class="results-container" id="results">
+            <div class="results-header">
+                <h2 class="results-title">Your Carbon Footprint Results</h2>
+                <div class="total-footprint" id="total-footprint">0 tonnes CO2e/year</div>
+                <div class="comparison">Global Average: 7.8 tonnes • US Average: 16 tonnes</div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-wrapper">
+                    <div class="chart-title">Footprint Breakdown</div>
+                    <canvas id="breakdownChart"></canvas>
+                </div>
+                
+                <div class="chart-wrapper">
+                    <div class="chart-title">Global Comparison</div>
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="recommendations">
+                <h3 class="recommendations-title"><i class="fas fa-robot"></i> AI-Powered Recommendations</h3>
+                <div id="recommendations-content">
+                    <!-- Recommendations will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>🌱 Discover the unseen • 🌍 Act for the planet • ⚡️ Make every click count</p>
+        <p>© 2023 The Invisible Carbon Calculator | ICC</p>
+    </footer>
+    
+    <script>
+        // Emission Factors (kg CO2e)
+        const EMISSION_FACTORS = {
+            transport: {
+                gasoline_car: 0.192,
+                diesel_car: 0.171,
+                electric_car: 0.053,
+                bus: 0.089,
+                train: 0.041,
+                short_flight: 0.25,
+                long_flight: 0.18,
+                motorbike: 0.113
+            },
+            diet: {
+                meat_heavy: 2.5,
+                meat_medium: 1.8,
+                vegetarian: 1.2,
+                vegan: 0.8,
+                pescatarian: 1.5
+            },
+            household: {
+                electricity: 0.5,
+                natural_gas: 1.89,
+                heating_oil: 2.68,
+                water: 0.3,
+                waste: 0.1
+            },
+            digital: {
+                smartphone: 60,
+                laptop: 200,
+                desktop: 300,
+                streaming_hd: 0.06,
+                streaming_4k: 0.15,
+                social_media: 0.01,
+                cloud_storage: 0.2,
+                email: 0.000003,
+                gaming: 0.14
+            }
+        };
+
+        // Global Averages
+        const GLOBAL_AVERAGES = {
+            transport: 2400,
+            diet: 2000,
+            household: 3000,
+            digital: 400,
+            total: 7800
+        };
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                document.querySelectorAll('.calculator-container').forEach(calc => {
+                    calc.classList.remove('active');
+                });
+                document.getElementById(`${tab.dataset.tab}-calculator`).classList.add('active');
+            });
+        });
+
+        // Initialize all sliders
+        document.querySelectorAll('.slider').forEach(slider => {
+            const valueDisplay = document.getElementById(`${slider.id}-value`);
+            updateSliderDisplay(slider, valueDisplay);
+            
+            slider.addEventListener('input', () => {
+                updateSliderDisplay(slider, valueDisplay);
+            });
+        });
+
+        function updateSliderDisplay(slider, display) {
+            const unit = getSliderUnit(slider.id);
+            display.textContent = `${slider.value}${unit}`;
+        }
+
+        function getSliderUnit(id) {
+            const units = {
+                'car-km': ' km',
+                'short-flights': ' km',
+                'long-flights': ' km',
+                'meals': ' meals',
+                'electricity': ' kWh',
+                'gas': ' m³',
+                'water': ' m³',
+                'adv-car-km': ' km',
+                'adv-short-flights': ' km',
+                'adv-long-flights': ' km',
+                'adv-meals': ' meals',
+                'adv-electricity': ' kWh',
+                'adv-gas': ' m³',
+                'adv-water': ' m³',
+                'smartphones': '',
+                'laptops': '',
+                'desktops': '',
+                'streaming': ' hours',
+                'social-media': ' hours',
+                'cloud': ' GB',
+                'emails': ' emails',
+                'gaming': ' hours'
+            };
+            return units[id] || '';
+        }
+
+        // Select options
+        document.querySelectorAll('.select-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                // For options in the same group
+                const group = option.closest('.select-group');
+                if (group) {
+                    group.querySelectorAll('.select-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                }
+                option.classList.add('selected');
+            });
+        });
+
+        // Calculate buttons
+        document.getElementById('calculate-simple').addEventListener('click', () => calculateFootprint('simple'));
+        document.getElementById('calculate-advanced').addEventListener('click', () => calculateFootprint('advanced'));
+
+        function calculateFootprint(mode) {
+            // Get all input values
+            const inputs = {
+                transport: getTransportInputs(mode),
+                diet: getDietInputs(mode),
+                household: getHouseholdInputs(mode),
+                digital: mode === 'advanced' ? getDigitalInputs() : null
+            };
+            
+            // Calculate emissions
+            const results = {
+                transport: calculateTransport(inputs.transport),
+                diet: calculateDiet(inputs.diet),
+                household: calculateHousehold(inputs.household),
+                digital: mode === 'advanced' ? calculateDigital(inputs.digital) : 0
+            };
+            
+            results.total = results.transport + results.diet + results.household + results.digital;
+            
+            // Calculate percentages
+            results.transport_pct = (results.transport / results.total) * 100;
+            results.diet_pct = (results.diet / results.total) * 100;
+            results.household_pct = (results.household / results.total) * 100;
+            if (mode === 'advanced') {
+                results.digital_pct = (results.digital / results.total) * 100;
+            }
+            
+            // Display results
+            displayResults(results, mode);
+        }
+
+        // Calculation functions
+        function calculateTransport(data) {
+            let emissions = 0;
+            
+            // Car emissions
+            if (data.car_type !== 'none') {
+                const factorKey = `${data.car_type}_car`;
+                emissions += data.car_km * 52 * EMISSION_FACTORS.transport[factorKey];
+            }
+            
+            // Flight emissions
+            emissions += data.short_flights * EMISSION_FACTORS.transport.short_flight;
+            emissions += data.long_flights * EMISSION_FACTORS.transport.long_flight;
+            
+            return emissions;
+        }
+
+        function calculateDiet(data) {
+            return data.meals_per_day * 365 * EMISSION_FACTORS.diet[data.diet_type];
+        }
+
+        function calculateHousehold(data) {
+            const electricity = data.electricity * 12 * EMISSION_FACTORS.household.electricity;
+            const gas = data.gas * 12 * EMISSION_FACTORS.household.natural_gas;
+            const water = data.water * 12 * EMISSION_FACTORS.household.water;
+            return electricity + gas + water;
+        }
+
+        function calculateDigital(data) {
+            let emissions = 0;
+            
+            // Device emissions
+            emissions += data.smartphones * EMISSION_FACTORS.digital.smartphone;
+            emissions += data.laptops * EMISSION_FACTORS.digital.laptop;
+            emissions += data.desktops * EMISSION_FACTORS.digital.desktop;
+            
+            // Streaming
+            const streamingFactor = data.streaming_quality === '4k' ? 
+                EMISSION_FACTORS.digital.streaming_4k : 
+                EMISSION_FACTORS.digital.streaming_hd;
+            emissions += data.streaming_hrs * 52 * streamingFactor;
+            
+            // Other digital
+            emissions += data.social_media_hrs * 365 * EMISSION_FACTORS.digital.social_media;
+            emissions += data.cloud_storage * EMISSION_FACTORS.digital.cloud_storage;
+            emissions += data.emails * 365 * EMISSION_FACTORS.digital.email;
+            emissions += data.gaming_hrs * 52 * EMISSION_FACTORS.digital.gaming;
+            
+            return emissions;
+        }
+
+        // Helper functions to get input values
+        function getTransportInputs(mode) {
+            const prefix = mode === 'advanced' ? 'adv-' : '';
+            return {
+                car_type: document.querySelector(`#${mode}-calculator .transport-section .select-option.selected`)?.dataset.value || 'none',
+                car_km: parseFloat(document.getElementById(`${prefix}car-km`).value),
+                short_flights: parseFloat(document.getElementById(`${prefix}short-flights`).value),
+                long_flights: parseFloat(document.getElementById(`${prefix}long-flights`).value)
+            };
+        }
+
+        function getDietInputs(mode) {
+            const prefix = mode === 'advanced' ? 'adv-' : '';
+            return {
+                diet_type: document.querySelector(`#${mode}-calculator .diet-section .select-option.selected`)?.dataset.value || 'meat_medium',
+                meals_per_day: parseFloat(document.getElementById(`${prefix}meals`).value)
+            };
+        }
+
+        function getHouseholdInputs(mode) {
+            const prefix = mode === 'advanced' ? 'adv-' : '';
+            return {
+                electricity: parseFloat(document.getElementById(`${prefix}electricity`).value),
+                gas: parseFloat(document.getElementById(`${prefix}gas`).value),
+                water: parseFloat(document.getElementById(`${prefix}water`).value)
+            };
+        }
+
+        function getDigitalInputs() {
+            return {
+                smartphones: parseFloat(document.getElementById('smartphones').value),
+                laptops: parseFloat(document.getElementById('laptops').value),
+                desktops: parseFloat(document.getElementById('desktops').value),
+                streaming_hrs: parseFloat(document.getElementById('streaming').value),
+                streaming_quality: document.querySelector('#advanced-calculator .digital-section .select-option.selected')?.dataset.value || 'hd',
+                social_media_hrs: parseFloat(document.getElementById('social-media').value),
+                cloud_storage: parseFloat(document.getElementById('cloud').value),
+                emails: parseFloat(document.getElementById('emails').value),
+                gaming_hrs: parseFloat(document.getElementById('gaming').value)
+            };
+        }
+
+        // Display results
+        function displayResults(results, mode) {
+            const resultsContainer = document.getElementById('results');
+            
+            // Update total
+            document.getElementById('total-footprint').textContent = 
+                `${(results.total / 1000).toFixed(2)} tonnes CO2e/year`;
+            
+            // Show results
+            resultsContainer.style.display = 'block';
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            
+            // Render charts
+            renderCharts(results, mode);
+            
+            // Generate recommendations
+            generateRecommendations(results, mode);
+        }
+
+        function renderCharts(results, mode) {
+            // Breakdown Chart
+            const breakdownCtx = document.getElementById('breakdownChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.breakdownChart) {
+                window.breakdownChart.destroy();
+            }
+            
+            const breakdownLabels = ['Transport', 'Diet', 'Household'];
+            const breakdownData = [results.transport, results.diet, results.household];
+            const breakdownColors = ['#ff9999', '#66b3ff', '#99ff99'];
+            
+            if (mode === 'advanced' && results.digital > 0) {
+                breakdownLabels.push('Digital');
+                breakdownData.push(results.digital);
+                breakdownColors.push('#ffcc99');
+            }
+            
+            window.breakdownChart = new Chart(breakdownCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: breakdownLabels,
+                    datasets: [{
+                        data: breakdownData,
+                        backgroundColor: breakdownColors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw.toFixed(1)} kg CO2e`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Comparison Chart
+            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.comparisonChart) {
+                window.comparisonChart.destroy();
+            }
+            
+            window.comparisonChart = new Chart(comparisonCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['You', 'Global Avg', 'US Avg'],
+                    datasets: [{
+                        label: 'Tonnes CO2e/year',
+                        data: [
+                            results.total / 1000,
+                            GLOBAL_AVERAGES.total / 1000,
+                            16 // US average
+                        ],
+                        backgroundColor: ['#4caf50', '#2196f3', '#f44336'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Tonnes CO2e/year' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateRecommendations(results, mode) {
+            const recommendationsContainer = document.getElementById('recommendations-content');
+            
+            // Clear previous recommendations
+            recommendationsContainer.innerHTML = '';
+            
+            // Create recommendations based on highest impact areas
+            const areas = [
+                { name: 'Diet', value: results.diet, pct: results.diet_pct },
+                { name: 'Transport', value: results.transport, pct: results.transport_pct },
+                { name: 'Household', value: results.household, pct: results.household_pct }
+            ];
+            
+            if (mode === 'advanced') {
+                areas.push({ name: 'Digital', value: results.digital, pct: results.digital_pct });
+            }
+            
+            // Sort by highest impact
+            areas.sort((a, b) => b.pct - a.pct);
+            
+            // Generate recommendations
+            const recs = [
+                {
+                    title: "Reduce Meat Consumption",
+                    description: "Try replacing 2-3 meat-based meals per week with plant-based alternatives.",
+                    impact: "Up to 500 kg CO2e/year"
+                },
+                {
+                    title: "Improve Home Energy Efficiency",
+                    description: "Lower your thermostat by 1-2 degrees in winter, switch to LED bulbs, and unplug devices when not in use.",
+                    impact: "Up to 300 kg CO2e/year"
+                },
+                {
+                    title: "Optimize Transportation",
+                    description: "Combine errands to reduce driving trips, consider carpooling, or use public transport once a week.",
+                    impact: "Up to 200 kg CO2e/year"
+                }
+            ];
+            
+            // Add digital recommendation if needed
+            if (mode === 'advanced' && areas[0].name === 'Digital') {
+                recs[2] = {
+                    title: "Optimize Digital Habits",
+                    description: "Stream in lower quality when possible, clean up cloud storage, and reduce unnecessary notifications.",
+                    impact: "Up to 100 kg CO2e/year"
+                };
+            }
+            
+            // Add recommendations to the page
+            recs.forEach((rec, index) => {
+                const recCard = document.createElement('div');
+                recCard.className = 'recommendation-card';
+                recCard.innerHTML = `
+                    <div><span class="rec-number">${index + 1}</span> <strong>${rec.title}</strong></div>
+                    <p>${rec.description}</p>
+                    <div class="rec-impact">${rec.impact}</div>
+                `;
+                recommendationsContainer.appendChild(recCard);
+            });
+        }
+
+        // Initialize default selections
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simple calculator defaults
+            document.querySelectorAll('#simple-calculator .select-option[data-value="meat_medium"]').forEach(el => {
+                el.classList.add('selected');
+            });
+            
+            // Advanced calculator defaults
+            document.querySelectorAll('#advanced-calculator .select-option[data-value="meat_medium"]').forEach(el => {
+                el.classList.add('selected');
+            });
+            document.querySelectorAll('#advanced-calculator .select-option[data-value="hd"]').forEach(el => {
+                el.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>
