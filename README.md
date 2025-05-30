@@ -1,9 +1,9 @@
-# 🌱🌱🌱 The Invisible Carbon Calculator 🌱🌱🌱
+# 🌱🌱🌱 [The Invisible Carbon Calculator](https://diwashpatel.github.io/ms-cc-hackathon-template-DiwashPatel/) 🌱🌱🌱
 
 _Uncover the carbon footprint you can’t see—at home, on the road, and online._
 
 ---
-
+Visit: https://diwashpatel.github.io/ms-cc-hackathon-template-DiwashPatel/
 ## What is **Invisible Carbon**?
 
 Most carbon calculators ignore your digital life, but **Invisible Carbon** reveals the impact of your everyday habits—including food, travel, household, and especially your digital activities (streaming, scrolling, gaming, and more).
@@ -96,6 +96,7 @@ Most carbon calculators ignore your digital life, but **Invisible Carbon** revea
 - AI-powered tips use Gemini only if you provide an API key.
 - No data is stored or shared without your action.
 
+Visit: https://diwashpatel.github.io/ms-cc-hackathon-template-DiwashPatel/
 ---
 
 
